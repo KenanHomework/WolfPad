@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Images\about_icon.png" />
+    <None Remove="Images\keyboard_shortcut_icon.png" />
+    <None Remove="Images\notepad_icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SimpleInjector" Version="5.4.1" />
+    <PackageReference Include="WPF-UI" Version="2.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\about_icon.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\keyboard_shortcut_icon.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\notepad_icon.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+</Project>
