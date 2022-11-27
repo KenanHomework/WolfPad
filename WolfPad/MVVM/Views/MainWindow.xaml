@@ -149,6 +149,7 @@
 
                 </StackPanel>
 
+                <!--#region TextArea & SuggestionBoxPopup-->
                 <RichTextBox Grid.Row="1" Background="{StaticResource Secondary_clr}" Name="TextArea"
                     DataContext="{Binding Data,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                     TextChanged="TextArea_TextChanged" PreviewKeyUp="TextArea_PreviewKeyUp" Foreground="White" >
@@ -175,7 +176,8 @@
 
                     </Border>
                 </Popup>
-
+                <!--#endregion-->
+                
             </Grid>
 
             <!--#endregion-->

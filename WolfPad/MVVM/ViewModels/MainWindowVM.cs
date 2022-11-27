@@ -443,11 +443,8 @@ namespace WolfPad.MVVM.ViewModels
 
             try
             {
-                //string word = TextService.RemoveEscapeSequences(((SuggestionWord)Window.WordListView.SelectedItem).Word);
                 string word = ((SuggestionWord)Window.WordListView.SelectedItem).Word;
                 word = $" {word} ";
-
-                string data = Window.TextArea.GetText();
 
                 string after = Data.Substring(0, Index);
                 after += word;
