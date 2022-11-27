@@ -18,7 +18,7 @@
                     <SolidColorBrush x:Key="MainDark_clr" Color="#1f2022"/>
 
                     <!-- rgba(44,45,47,255) -->
-                    <SolidColorBrush x:Key="Selection_clr"  Color="#2c2d2f"/>
+                    <SolidColorBrush x:Key="Selection_clr"  Color="#383838"/>
 
                     <!-- rgba(196,43,28,255) -->
                     <SolidColorBrush x:Key="Red_clr"  Color="#c42b1c"/>
@@ -28,6 +28,7 @@
 
                 <!-- Styles -->
                 <ResourceDictionary Source="Styles/FontStyle.xaml"/>
+                <ResourceDictionary Source="Styles/SuggestionBoxListViewItemStyle.xaml"/>
 
 
                 <ui:ThemesDictionary Theme="Dark" />

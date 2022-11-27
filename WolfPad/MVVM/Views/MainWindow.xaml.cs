@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using WolfPad.MVVM.ViewModels;
 using Wpf.Ui.Common;
 using Wpf.Ui.Controls;
+using System.Drawing;
+using WolfPad.ExtensionMethods;
 
 namespace WolfPad.MVVM.Views
 {
@@ -27,8 +29,10 @@ namespace WolfPad.MVVM.Views
             InitializeComponent();
             App.Container.GetInstance<MainWindowVM>().Window = this;
             DataContext = App.Container.GetInstance<MainWindowVM>();
-            App.Container.GetInstance<MainWindowVM>().ReadReoOpen();
+            _ = App.Container.GetInstance<MainWindowVM>().ReadReoOpen();
         }
+
+
 
         private void ResizeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -60,9 +64,62 @@ namespace WolfPad.MVVM.Views
                 DragMove();
         }
 
+
+
         private void TextArea_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (SuggestionBarPopup.IsOpen)
+            {
+                App.Container.GetInstance<MainWindowVM>().GetFilterWord(e);
+            }
+
             App.Container.GetInstance<MainWindowVM>().TexChanged(true);
         }
+
+        private void TextArea_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (SuggestionBarPopup.IsOpen)
+            {
+                switch (e.Key)
+                {
+                    case Key.Down:
+                        try { WordListView.SelectedIndex--; }
+                        catch (Exception) { }
+                        break;
+
+                    case Key.Up:
+                        try { WordListView.SelectedIndex++; }
+                        catch (Exception) { }
+                        break;
+
+                    case Key.Enter:
+                        App.Container.GetInstance<MainWindowVM>().ApplySuggestionCommand.Execute(e);
+                        break;
+                    default:
+                        break;
+                }
+                return;
+            }
+
+            else if (!new KeyGesture(Key.Space, ModifierKeys.Control).Matches(null, e))
+                return;
+
+            App.Container.GetInstance<MainWindowVM>().AutoCompleteCommand
+                         .Execute(e.Key);
+        }
+
+
+
+        private void WordListView_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter && e.Key != Key.Space)
+                return;
+
+            App.Container.GetInstance<MainWindowVM>().ApplySuggestionCommand
+                                             .Execute(e);
+        }
+
+        private void WordListView_MouseDoubleClick(object sender, MouseButtonEventArgs e) => App.Container.GetInstance<MainWindowVM>().ApplySuggestionCommand.Execute(e);
+
     }
 }

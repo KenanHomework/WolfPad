@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WolfPad.MVVM.Views" 
-        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" 
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:usercontrols="clr-namespace:WolfPad.UserControls"
         AllowsTransparency="True" ResizeMode="CanResizeWithGrip"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" WindowStyle="None"
         Title="Wolf Pad"  Background="Transparent"
@@ -14,7 +14,6 @@
         <KeyBinding Command="{Binding OpenCommand}"    Key="O"    Gesture="CTRL+O"/>
         <KeyBinding Command="{Binding SaveCommand}"    Key="S"    Gesture="CTRL+S"/>
         <KeyBinding Command="{Binding SaveAsCommand}"  Key="S"    Gesture="CTRL+SHIFt+S"/>
-
 
         <KeyBinding Command="{Binding SaveToReopenCommand}" 
                     Key="S" Gesture="CTRL + SHIFT + ALT + S"/>
@@ -27,6 +26,9 @@
 
         <KeyBinding Command="{Binding ShowShorcutCommand}" 
                     Key="P"  Gesture="CTRL+SHIFt+P"/>
+
+        <KeyBinding Command="{Binding AboutCommand}" 
+                    Key="F1"  Gesture="F1"/>
 
 
         <KeyBinding Command="{Binding AutoCompleteCommand}"  Key="Space" Gesture="CTRL+SPACE"/>
@@ -75,7 +77,6 @@
 
             <!--#endregion-->
 
-
             <!--#region AppView-->
 
             <Grid Background="{StaticResource MainDark_clr}">
@@ -89,7 +90,7 @@
                     <!--#region File-->
 
                     <Menu DockPanel.Dock="Top" Background="{StaticResource MainDark_clr}" Foreground="White" FontSize="10">
-                        <ui:MenuItem Header="_File">
+                        <ui:MenuItem Header="_File" >
 
                             <ui:MenuItem Header="_New"      
                                          InputGestureText="CTRL + N"
@@ -137,7 +138,8 @@
                                          InputGestureText="CTRL + SHIFT + P"
                                          Command="{Binding ShowShorcutCommand}"/>
 
-                            <ui:MenuItem Header="_About"      
+                            <ui:MenuItem Header="_About"
+                                         InputGestureText="F1"
                                          Command="{Binding AboutCommand}"/>
 
                         </ui:MenuItem>
@@ -149,8 +151,30 @@
 
                 <RichTextBox Grid.Row="1" Background="{StaticResource Secondary_clr}" Name="TextArea"
                     DataContext="{Binding Data,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                    TextChanged="TextArea_TextChanged" />
+                    TextChanged="TextArea_TextChanged" PreviewKeyUp="TextArea_PreviewKeyUp" Foreground="White" >
+                    <RichTextBox.InputBindings>
+                        <KeyBinding Command="{Binding AutoCompleteCommand}"  Key="Space" />
+                    </RichTextBox.InputBindings>
 
+                </RichTextBox>
+
+                <Popup Name="SuggestionBarPopup"  Width="200" Height="250" Focusable="True" Placement="Center" PopupAnimation="Slide">
+                    <Popup.InputBindings>
+                        <KeyBinding Command="{Binding ExitAutoCompleteCommand}"  Key="Esc"/>
+                    </Popup.InputBindings>
+
+                    <Border Background="{StaticResource Secondary_clr}" Padding="0" Margin="0"
+                            BorderBrush="{StaticResource MainDark_clr}" BorderThickness="1">
+
+                        <ListView SelectionMode="Single" Name="WordListView" Padding="0"
+                                  PreviewKeyUp="WordListView_PreviewKeyUp"
+                                  MouseDoubleClick="WordListView_MouseDoubleClick"
+                                  Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                                  ItemContainerStyle="{StaticResource SuggestItem}" Width="210" Height="220" Margin="0"
+                                  ItemsSource="{Binding SuggestionWords,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                    </Border>
+                </Popup>
 
             </Grid>
 

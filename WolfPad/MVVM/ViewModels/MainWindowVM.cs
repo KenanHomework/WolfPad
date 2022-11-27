@@ -1,22 +1,32 @@
-﻿using Microsoft.Win32;
+﻿using Faker;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media.Media3D;
 using WolfPad.Commands;
 using WolfPad.Enums;
 using WolfPad.ExtensionMethods;
+using WolfPad.MVVM.Models;
 using WolfPad.MVVM.Views;
 using WolfPad.Services;
+using WolfPad.UserControls;
 using Wpf.Ui.Common;
 using Wpf.Ui.Controls;
 using static System.Net.Mime.MediaTypeNames;
@@ -46,6 +56,8 @@ namespace WolfPad.MVVM.ViewModels
         }
 
         private string path;
+        private ObservableCollection<SuggestionWord> suggestionWords = new ObservableCollection<SuggestionWord>();
+        private string filterWord;
 
         public string Path
         {
@@ -55,9 +67,77 @@ namespace WolfPad.MVVM.ViewModels
 
         public MainWindow Window { get; set; }
 
+        public ObservableCollection<SuggestionWord> Words { get; set; } = new ObservableCollection<SuggestionWord>();
+
+        public ObservableCollection<SuggestionWord> SuggestionWords
+        {
+            get => suggestionWords;
+            set
+            {
+                suggestionWords = value;
+                Window.WordListView.ItemsSource = value;
+                try { Window.WordListView.SelectedIndex = 0; }
+                catch (Exception) { }
+
+            }
+        }
+
+        public string FilterWord
+        {
+            get => filterWord; set
+            {
+                filterWord = value;
+                FilterWords();
+            }
+        }
+
+        public int Index { get; set; }
+
+        public int Length { get; set; }
+
+        public string Data { get; set; }
+
+        public TextPointer CaretPosition { get; set; }
+
         #endregion
 
         #region Methods
+
+        public void ResetAutocompleteProperties()
+        {
+            CaretPosition = null;
+            Words.Clear();
+            SuggestionWords.Clear();
+            FilterWord = string.Empty;
+            Data = string.Empty;
+            Index = 0;
+            Length = 0;
+        }
+
+        public void GetFilterWord(TextChangedEventArgs e)
+        {
+
+            var change = e.Changes.First();
+
+            string data = Window.TextArea.GetText();
+
+            Length += change.AddedLength;
+            Length -= change.RemovedLength;
+
+            if (Length == 0)
+            {
+                FilterWord = string.Empty;
+                return;
+            }
+            else if (Length < 0)
+            {
+                ExitAutoCompleteRun(e);
+                return;
+            }
+
+
+            FilterWord = data.Substring(Index, Length);
+        }
 
         public async Task CloseAsync()
         {
@@ -83,9 +163,12 @@ namespace WolfPad.MVVM.ViewModels
             {
                 SaveFileDialog sfd = new SaveFileDialog();
                 sfd.ShowDialog();
-                path = sfd.FileName;
 
-                await FileService.SaveFile(path, Window.TextArea.GetText());
+                if (!string.IsNullOrWhiteSpace(sfd.FileName))
+                {
+                    path = sfd.FileName;
+                    await FileService.SaveFile(path, Window.TextArea.GetText());
+                }
             }
 
             System.Windows.Application.Current.Shutdown();
@@ -304,14 +387,85 @@ namespace WolfPad.MVVM.ViewModels
             return !string.IsNullOrEmpty(App.AppConfig.ReOpenPath);
         }
 
-        public void AutoCompleteRun(object param)
-        {
-            System.Windows.MessageBox.Show("Auto Complete!");
-        }
-
         public void AboutRun(object param) => new About().ShowDialog();
 
         public void ShowShorcutRun(object param) => new Shortcuts().ShowDialog();
+
+
+        public async Task ReadData()
+        {
+            string data = Window.TextArea.GetText();
+            List<string> list = new();
+
+            list = data.Split(' ', '\n', '\t').ToList();
+
+            list.ForEach(x =>
+            {
+                if (!string.IsNullOrWhiteSpace(x))
+                    Words.Add(new SuggestionWord() { Word = TextService.RemoveEscapeSequences(x) }); ;
+            });
+        }
+
+        public void FilterWords()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(FilterWord))
+                {
+                    SuggestionWords = Words;
+                    return;
+                }
+                SuggestionWords = new ObservableCollection<SuggestionWord>(Words.Where(w => { return w.Word.StartsWith(FilterWord); }).ToList());
+            }
+            catch (Exception) { }
+        }
+
+        public async void AutoCompleteRun(object param)
+        {
+
+            ResetAutocompleteProperties();
+
+            await ReadData();
+
+            Data = Window.TextArea.GetText();
+
+            SuggestionWords = Words;
+            Window.SuggestionBarPopup.IsOpen = true;
+
+            CaretPosition = Window.TextArea.CaretPosition;
+            Index = new TextRange(Window.TextArea.Document.ContentStart, Window.TextArea.CaretPosition).Text.Length;
+        }
+
+        public void ApplySuggestionRun(object param)
+        {
+            if (!Window.SuggestionBarPopup.IsOpen)
+                return;
+
+            try
+            {
+                //string word = TextService.RemoveEscapeSequences(((SuggestionWord)Window.WordListView.SelectedItem).Word);
+                string word = ((SuggestionWord)Window.WordListView.SelectedItem).Word;
+                word = $" {word} ";
+
+                string data = Window.TextArea.GetText();
+
+                string after = Data.Substring(0, Index);
+                after += word;
+                after += Data.Substring(Index);
+
+                Window.TextArea.SetText(after);
+                Window.TextArea.CaretPosition = CaretPosition;
+            }
+            catch (Exception) { }
+            finally { ExitAutoCompleteRun(param); }
+        }
+
+        public void ExitAutoCompleteRun(object param)
+        {
+            ResetAutocompleteProperties();
+
+            Window.SuggestionBarPopup.IsOpen = false;
+        }
 
         #endregion
 
@@ -325,9 +479,13 @@ namespace WolfPad.MVVM.ViewModels
         public RelayCommand SaveToReopenCommand { get; set; }
         public RelayCommand RemoveFromReopenCommand { get; set; }
         public RelayCommand ExitCommand { get; set; }
-        public RelayCommand AutoCompleteCommand { get; set; }
         public RelayCommand AboutCommand { get; set; }
         public RelayCommand ShowShorcutCommand { get; set; }
+
+        public RelayCommand AutoCompleteCommand { get; set; }
+
+        public RelayCommand ExitAutoCompleteCommand { get; set; }
+        public RelayCommand ApplySuggestionCommand { get; set; }
 
         #endregion
 
@@ -344,16 +502,28 @@ namespace WolfPad.MVVM.ViewModels
         public MainWindowVM()
         {
             TextChangedCommand = new RelayCommand(TextChangedRun);
+
+            /* File */
             NewCommand = new RelayCommand(NewCommandRunAsync);
             OpenCommand = new RelayCommand(OpenCommandRun);
             SaveCommand = new RelayCommand(SaveCommandRun, TextBoxAreaIsNull);
             SaveAsCommand = new RelayCommand(SaveAsCommandRun, TextBoxAreaIsNull);
+
+            /* Re-Open */
             SaveToReopenCommand = new RelayCommand(SaveToReopenRun, SaveToReopenCanRun);
             RemoveFromReopenCommand = new RelayCommand(RemoveFromReopenCommandRun, RemoveFromReopenCommandCanRun);
+
+            /* Exit */
             ExitCommand = new RelayCommand(ExitCommandRun);
-            AutoCompleteCommand = new RelayCommand(AutoCompleteRun);
+
+            /* Help Menu */
             AboutCommand = new RelayCommand(AboutRun);
             ShowShorcutCommand = new RelayCommand(ShowShorcutRun);
+
+            /* Autocomplete */
+            AutoCompleteCommand = new RelayCommand(AutoCompleteRun);
+            ApplySuggestionCommand = new RelayCommand(ApplySuggestionRun);
+            ExitAutoCompleteCommand = new RelayCommand(ExitAutoCompleteRun);
 
             State = WPState.Empty;
 

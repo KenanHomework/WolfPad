@@ -70,7 +70,7 @@
 
                     <ui:Hyperlink Content="Project Source" 
                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                  NavigateUri="https://github.com/kenanysbv"/>
+                                  NavigateUri="https://github.com/KenanHomework/WolfPad"/>
 
                     <ui:Hyperlink Content="Github Main Account" 
                                   HorizontalAlignment="Center" VerticalAlignment="Center"

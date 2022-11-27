@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="WolfPad.UserControls.SuggestionBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WolfPad.UserControls"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             mc:Ignorable="d" Background="{StaticResource Secondary_clr}"
+             Height="250" Width="200" 
+             BorderBrush="{StaticResource MainDark_clr}" BorderThickness="1"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <ListView SelectionMode="Single" Name="WordListView"
+              IsSynchronizedWithCurrentItem="True"
+              ItemContainerStyle="{StaticResource SuggestItem}"
+              ItemsSource="{Binding Words,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+
+</UserControl>

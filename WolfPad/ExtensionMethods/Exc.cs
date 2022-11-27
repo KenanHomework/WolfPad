@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using WolfPad.Services;
 
 namespace WolfPad.ExtensionMethods
 {
@@ -20,6 +22,7 @@ namespace WolfPad.ExtensionMethods
         {
             return new TextRange(richTextBox.Document.ContentStart,
                 richTextBox.Document.ContentEnd).Text;
+
         }
     }
 
