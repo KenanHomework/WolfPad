@@ -72,13 +72,9 @@
                                   HorizontalAlignment="Center" VerticalAlignment="Center"
                                   NavigateUri="https://github.com/KenanHomework/WolfPad"/>
 
-                    <ui:Hyperlink Content="Github Main Account" 
+                    <ui:Hyperlink Content="Github Account" 
                                   HorizontalAlignment="Center" VerticalAlignment="Center"
                                   NavigateUri="https://github.com/kenanysbv"/>
-
-                    <ui:Hyperlink Content="Github Learining Account" 
-                                  HorizontalAlignment="Center" VerticalAlignment="Center"
-                                  NavigateUri="https://github.com/KenanHomework"/>
 
                 </StackPanel>
 
